@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 type AuthContextType = {
   authenticated: boolean;
@@ -39,11 +39,9 @@ export const useAuth = () => useContext(AuthContext);
 
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { authenticated } = useAuth();
-  const navigate = useNavigate();
 
   if (!authenticated) {
-    navigate("/login");
-    return null;
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
