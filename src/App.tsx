@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, ProtectedRoute } from "@/hooks/useAuth";
+import KeyboardShortcuts from "@/components/KeyboardShortcuts";
+import MobileFAB from "@/components/MobileFAB";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Upload from "./pages/Upload";
@@ -24,6 +26,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <KeyboardShortcuts />
+          <MobileFAB />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
