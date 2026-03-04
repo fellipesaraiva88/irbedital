@@ -38,8 +38,7 @@ const Upload = () => {
       setStep("uploading");
       setProgress(20);
 
-      // Upload file to storage
-      const filePath = `${user.id}/${Date.now()}_${file.name}`;
+      const filePath = `shared/${Date.now()}_${file.name}`;
       const { error: uploadError } = await supabase.storage
         .from("tender-files")
         .upload(filePath, file);
