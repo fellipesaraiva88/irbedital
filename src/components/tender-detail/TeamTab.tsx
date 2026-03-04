@@ -33,8 +33,8 @@ const TeamTab = ({ tender }: { tender: Tender }) => {
 
   const fetchData = async () => {
     const [assignRes, profRes] = await Promise.all([
-      supabase.from("tender_team_assignments").select("*").eq("tender_id", tender.id).order("created_at"),
-      supabase.from("professionals").select("id, name, crm, specialty").order("name"),
+      (supabase as any).from("tender_team_assignments").select("*").eq("tender_id", tender.id).order("created_at"),
+      (supabase as any).from("professionals").select("id, name, crm, specialty").order("name"),
     ]);
     setAssignments((assignRes.data as unknown as TeamAssignment[]) || []);
     setProfessionals((profRes.data as unknown as Professional[]) || []);
