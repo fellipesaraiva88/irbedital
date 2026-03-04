@@ -30,7 +30,7 @@ const Professionals = () => {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const fetchProfessionals = async () => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("professionals")
       .select("*")
       .order("name", { ascending: true });

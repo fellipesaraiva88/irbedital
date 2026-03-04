@@ -81,7 +81,7 @@ const TeamTab = ({ tender }: { tender: Tender }) => {
       professional_id: professionalId,
       is_filled: !!professionalId,
     };
-    await supabase.from("tender_team_assignments").update(updateData).eq("id", assignmentId);
+    await (supabase as any).from("tender_team_assignments").update(updateData).eq("id", assignmentId);
     setAssignments(assignments.map((a) =>
       a.id === assignmentId ? { ...a, professional_id: professionalId, is_filled: !!professionalId } : a
     ));

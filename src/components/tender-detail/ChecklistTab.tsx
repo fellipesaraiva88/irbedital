@@ -59,7 +59,7 @@ const ChecklistTab = ({ tenderId }: { tenderId: string }) => {
 
   const addItem = async () => {
     if (!newItemTitle.trim()) return;
-    const { data } = await supabase.from("tender_checklist_items").insert({
+    const { data } = await (supabase as any).from("tender_checklist_items").insert({
       tender_id: tenderId,
       title: newItemTitle.trim(),
       source: "manual",
