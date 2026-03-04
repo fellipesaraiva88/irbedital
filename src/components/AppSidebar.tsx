@@ -1,6 +1,6 @@
 import { FileSearch, LayoutDashboard, Upload, Bell, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -10,8 +10,14 @@ const links = [
 ];
 
 const AppSidebar = () => {
-  const { signOut, user } = useAuth();
+  const { signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    signOut();
+    navigate("/login");
+  };
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-sidebar border-r border-sidebar-border">
@@ -41,9 +47,8 @@ const AppSidebar = () => {
       </nav>
 
       <div className="border-t border-sidebar-border p-4">
-        <div className="mb-3 truncate text-xs text-sidebar-foreground/60">{user?.email}</div>
         <button
-          onClick={signOut}
+          onClick={handleSignOut}
           className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
           <LogOut className="h-4 w-4" />

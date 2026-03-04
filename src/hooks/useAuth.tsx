@@ -1,46 +1,32 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
 type AuthContextType = {
-  session: Session | null;
-  user: User | null;
-  loading: boolean;
-  signOut: () => Promise<void>;
+  authenticated: boolean;
+  signOut: () => void;
 };
 
 const AuthContext = createContext<AuthContextType>({
-  session: null,
-  user: null,
-  loading: true,
-  signOut: async () => {},
+  authenticated: false,
+  signOut: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem("pin_authenticated") === "true");
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  const signOut = () => {
+    sessionStorage.removeItem("pin_authenticated");
+    setAuthenticated(false);
   };
 
+  useEffect(() => {
+    const handler = () => setAuthenticated(sessionStorage.getItem("pin_authenticated") === "true");
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, loading, signOut }}>
+    <AuthContext.Provider value={{ authenticated, signOut }}>
       {children}
     </AuthContext.Provider>
   );
@@ -49,23 +35,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => useContext(AuthContext);
 
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
-  const { session, loading } = useAuth();
+  const { authenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !session) {
-      navigate("/login");
-    }
-  }, [session, loading, navigate]);
+    if (!authenticated) navigate("/login");
+  }, [authenticated, navigate]);
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
-  }
-
-  if (!session) return null;
+  if (!authenticated) return null;
   return <>{children}</>;
 };
