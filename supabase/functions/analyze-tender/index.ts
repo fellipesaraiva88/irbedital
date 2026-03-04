@@ -46,31 +46,44 @@ serve(async (req) => {
 
     console.log("PDF size:", arrayBuffer.byteLength, "bytes, base64 length:", base64.length);
 
-    const systemPrompt = `Você é um especialista em análise de licitações e editais públicos brasileiros. 
-Analise o documento PDF fornecido e extraia informações estruturadas de forma detalhada.
+const systemPrompt = `Você é um especialista em análise de licitações e editais públicos brasileiros. 
+Analise o documento PDF fornecido e extraia informações estruturadas.
 
 IMPORTANTE: Responda APENAS com JSON válido, sem markdown, sem code blocks, sem explicações extras.
+SEJA CONCISO: Use frases curtas e diretas. Nada de parágrafos longos.
 
 O JSON deve ter exatamente esta estrutura:
 {
   "title": "título completo do edital/licitação",
-  "description": "descrição detalhada do objeto da licitação em 2-3 frases",
-  "organization": "nome completo do órgão/entidade responsável",
+  "description": "objeto da licitação em 1 frase curta",
+  "organization": "nome do órgão responsável",
   "category": "uma das opções: obras, servicos, compras, tecnologia, saude, educacao, outros",
   "value_estimate": null ou número (valor estimado sem R$),
-  "deadline": null ou "YYYY-MM-DD" (data limite para propostas),
-  "location": "cidade/estado onde será executado",
-  "requirements": ["lista de requisitos principais para participação", "habilitação técnica exigida", "documentos necessários"],
+  "deadline": null ou "YYYY-MM-DD",
+  "location": "cidade/UF",
+  "requirements": ["requisito 1 (frase curta)", "requisito 2", "requisito 3"],
   "contact_info": {"email": "", "phone": "", "address": "", "responsible": ""},
-  "summary": "Resumo executivo completo do edital com: 1) Objeto da licitação, 2) Modalidade (pregão, concorrência, etc), 3) Critério de julgamento, 4) Prazo de execução, 5) Condições de participação, 6) Garantias exigidas. Deve ter 4-6 parágrafos detalhados.",
+  "summary": "Resumo executivo em no máximo 3 frases curtas cobrindo: objeto, modalidade, critério de julgamento e prazo.",
   "insights": {
-    "risks": "Análise detalhada dos riscos: prazos apertados, exigências complexas, multas, penalidades, cláusulas restritivas",
-    "opportunities": "Oportunidades identificadas: valor atrativo, baixa concorrência esperada, possibilidade de subcontratação, margens",
-    "recommendations": "Recomendações práticas: documentos a preparar com antecedência, pontos de atenção na proposta, estratégia sugerida",
-    "compliance_checklist": ["item 1 a verificar", "item 2 a verificar", "item 3 a verificar"],
-    "key_dates": [{"date": "YYYY-MM-DD", "description": "descrição do evento"}],
+    "risks": "2-3 riscos principais em formato de lista curta separada por |",
+    "opportunities": "2-3 oportunidades em formato de lista curta separada por |",
+    "recommendations": "2-3 recomendações práticas em formato de lista curta separada por |",
+    "compliance_checklist": ["item curto 1", "item curto 2", "item curto 3"],
+    "key_dates": [{"date": "YYYY-MM-DD", "description": "evento curto"}],
     "estimated_complexity": "baixa, média ou alta",
-    "modality": "pregão eletrônico, concorrência, tomada de preços, etc"
+    "modality": "pregão eletrônico, concorrência, etc",
+    "score": 0-100 (nota de atratividade: 0=ruim, 100=excelente oportunidade),
+    "atestados_tecnicos": [
+      {
+        "descricao": "descrição curta do atestado exigido",
+        "quantidade": "quantidade mínima exigida (ex: 50% do quantitativo)",
+        "especialidade": "área técnica (ex: engenharia civil, TI, saúde)",
+        "tipo": "profissional ou empresa",
+        "obrigatorio": true ou false
+      }
+    ],
+    "total_atestados": número total de atestados exigidos,
+    "complexidade_atestados": "baixa, média ou alta"
   }
 }`;
 
