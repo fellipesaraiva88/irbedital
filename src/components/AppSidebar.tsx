@@ -1,4 +1,4 @@
-import { FileSearch, LayoutDashboard, Upload, Bell, LogOut, ArrowLeftRight, Clock, Menu, X } from "lucide-react";
+import { FileSearch, LayoutDashboard, Upload, Bell, LogOut, ArrowLeftRight, Clock, Menu, X, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const links = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/upload", icon: Upload, label: "Upload de Edital" },
+  { to: "/professionals", icon: Users, label: "Profissionais" },
   { to: "/compare", icon: ArrowLeftRight, label: "Comparar" },
   { to: "/history", icon: Clock, label: "Histórico" },
   { to: "/alerts", icon: Bell, label: "Alertas" },

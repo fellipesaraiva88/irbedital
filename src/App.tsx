@@ -12,6 +12,7 @@ import TenderChat from "./pages/TenderChat";
 import Alerts from "./pages/Alerts";
 import Compare from "./pages/Compare";
 import History from "./pages/History";
+import Professionals from "./pages/Professionals";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/tender/:id/chat" element={<ProtectedRoute><TenderChat /></ProtectedRoute>} />
             <Route path="/compare" element={<ProtectedRoute><Compare /></ProtectedRoute>} />
             <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+            <Route path="/professionals" element={<ProtectedRoute><Professionals /></ProtectedRoute>} />
             <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

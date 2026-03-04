@@ -1,5 +1,6 @@
-export type TenderStatus = 'new' | 'analyzing' | 'analyzed' | 'archived';
+export type TenderStatus = 'new' | 'analyzing' | 'analyzed' | 'em_montagem' | 'proposta_pronta' | 'enviado' | 'resultado' | 'archived';
 export type TenderCategory = 'obras' | 'servicos' | 'compras' | 'tecnologia' | 'saude' | 'educacao' | 'outros';
+export type TenderResult = 'won' | 'lost' | 'pending';
 
 export interface Tender {
   id: string;
@@ -9,6 +10,7 @@ export interface Tender {
   organization: string | null;
   category: TenderCategory;
   status: TenderStatus;
+  result: TenderResult | null;
   value_estimate: number | null;
   deadline: string | null;
   location: string | null;
@@ -20,6 +22,7 @@ export interface Tender {
   ai_summary: string | null;
   ai_insights: Record<string, unknown> | null;
   raw_text: string | null;
+  is_favorite: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -38,5 +41,19 @@ export const STATUS_LABELS: Record<TenderStatus, string> = {
   new: 'Novo',
   analyzing: 'Analisando',
   analyzed: 'Analisado',
+  em_montagem: 'Em Montagem',
+  proposta_pronta: 'Proposta Pronta',
+  enviado: 'Enviado',
+  resultado: 'Resultado',
   archived: 'Arquivado',
 };
+
+export const RESULT_LABELS: Record<TenderResult, string> = {
+  won: 'Ganhou',
+  lost: 'Perdeu',
+  pending: 'Pendente',
+};
+
+export const STATUS_ORDER: TenderStatus[] = [
+  'new', 'analyzing', 'analyzed', 'em_montagem', 'proposta_pronta', 'enviado', 'resultado', 'archived'
+];

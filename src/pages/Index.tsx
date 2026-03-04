@@ -5,12 +5,23 @@ import TenderCard from "@/components/TenderCard";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tender, TenderCategory, CATEGORY_LABELS, STATUS_LABELS, TenderStatus } from "@/lib/tender-types";
-import { Search, FileSearch, TrendingUp, Clock, CheckCircle2, AlertTriangle, Star } from "lucide-react";
+import { Search, FileSearch, TrendingUp, Clock, CheckCircle2, AlertTriangle, Star, Hammer, Send, Trophy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer } from "recharts";
 
-const CHART_COLORS = ["hsl(230,80%,56%)", "hsl(160,60%,45%)", "hsl(38,92%,50%)", "hsl(0,72%,55%)", "hsl(280,60%,55%)", "hsl(200,70%,50%)", "hsl(320,60%,50%)"];
+const CHART_COLORS = ["hsl(230,80%,56%)", "hsl(160,60%,45%)", "hsl(38,92%,50%)", "hsl(0,72%,55%)", "hsl(280,60%,55%)", "hsl(200,70%,50%)", "hsl(320,60%,50%)", "hsl(100,50%,40%)"];
+
+const pipelineStatusColors: Record<string, string> = {
+  new: "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20",
+  analyzing: "bg-warning/10 text-warning border-warning/20 hover:bg-warning/20",
+  analyzed: "bg-success/10 text-success border-success/20 hover:bg-success/20",
+  em_montagem: "bg-orange-500/10 text-orange-600 border-orange-500/20 hover:bg-orange-500/20",
+  proposta_pronta: "bg-blue-500/10 text-blue-600 border-blue-500/20 hover:bg-blue-500/20",
+  enviado: "bg-purple-500/10 text-purple-600 border-purple-500/20 hover:bg-purple-500/20",
+  resultado: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20",
+  archived: "bg-muted text-muted-foreground border-border hover:bg-muted/80",
+};
 
 const Index = () => {
   const [tenders, setTenders] = useState<Tender[]>([]);
@@ -34,7 +45,7 @@ const Index = () => {
       const matchesSearch = !search || t.title.toLowerCase().includes(search.toLowerCase()) || t.organization?.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = categoryFilter === "all" || t.category === categoryFilter;
       const matchesStatus = statusFilter === "all" || t.status === statusFilter;
-      const matchesFav = !showFavorites || (t as any).is_favorite;
+      const matchesFav = !showFavorites || t.is_favorite;
       return matchesSearch && matchesCategory && matchesStatus && matchesFav;
     })
     .sort((a, b) => {
@@ -43,17 +54,20 @@ const Index = () => {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
 
+  const countByStatus = (status: TenderStatus) => tenders.filter((t) => t.status === status).length;
+
   const stats = {
     total: tenders.length,
-    analyzed: tenders.filter((t) => t.status === "analyzed").length,
-    analyzing: tenders.filter((t) => t.status === "analyzing").length,
-    recent: tenders.filter((t) => {
-      const d = new Date(t.created_at);
-      const week = new Date();
-      week.setDate(week.getDate() - 7);
-      return d > week;
-    }).length,
+    analyzed: countByStatus("analyzed"),
+    em_montagem: countByStatus("em_montagem"),
+    enviado: countByStatus("enviado") + countByStatus("proposta_pronta"),
+    won: tenders.filter((t) => t.status === "resultado" && (t as any).result === "won").length,
+    lost: tenders.filter((t) => t.status === "resultado" && (t as any).result === "lost").length,
   };
+
+  const successRate = (stats.won + stats.lost) > 0
+    ? Math.round((stats.won / (stats.won + stats.lost)) * 100)
+    : null;
 
   // Deadline alerts
   const deadlineAlerts = tenders.filter((t) => {
@@ -77,6 +91,9 @@ const Index = () => {
     }, {})
   ).map(([name, value], i) => ({ name: STATUS_LABELS[name as TenderStatus] || name, value, fill: CHART_COLORS[i % CHART_COLORS.length] }));
 
+  // Pipeline status list
+  const pipelineStatuses: TenderStatus[] = ["new", "analyzing", "analyzed", "em_montagem", "proposta_pronta", "enviado", "resultado", "archived"];
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -85,13 +102,38 @@ const Index = () => {
           <p className="mt-1 text-muted-foreground">Visão geral dos seus editais</p>
         </div>
 
+        {/* Pipeline horizontal */}
+        <div className="flex flex-wrap gap-2">
+          {pipelineStatuses.map((status) => {
+            const count = countByStatus(status);
+            const isActive = statusFilter === status;
+            return (
+              <button
+                key={status}
+                onClick={() => setStatusFilter(isActive ? "all" : status)}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                  isActive
+                    ? pipelineStatusColors[status].replace("hover:", "") + " ring-2 ring-offset-1 ring-current/20"
+                    : pipelineStatusColors[status]
+                }`}
+              >
+                {STATUS_LABELS[status]}
+                <span className="rounded-full bg-black/10 dark:bg-white/10 px-1.5 py-0.5 text-[10px] font-bold min-w-[18px] text-center">
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Stats */}
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
           {[
             { label: "Total", value: stats.total, icon: FileSearch, color: "text-primary" },
             { label: "Analisados", value: stats.analyzed, icon: CheckCircle2, color: "text-success" },
-            { label: "Em Análise", value: stats.analyzing, icon: TrendingUp, color: "text-warning" },
-            { label: "Esta Semana", value: stats.recent, icon: Clock, color: "text-primary" },
+            { label: "Em Montagem", value: stats.em_montagem, icon: Hammer, color: "text-orange-500" },
+            { label: "Enviados", value: stats.enviado, icon: Send, color: "text-purple-500" },
+            { label: "Taxa de Sucesso", value: successRate !== null ? `${successRate}%` : "—", icon: Trophy, color: "text-emerald-500" },
           ].map((stat) => (
             <Card key={stat.label} className="border-border/50">
               <CardContent className="flex items-center gap-3 p-4">
@@ -187,7 +229,7 @@ const Index = () => {
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-36">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>

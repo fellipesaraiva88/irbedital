@@ -5,13 +5,16 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Tender } from "@/lib/tender-types";
-import { Sparkles, ListChecks, Award, BarChart3, FileText } from "lucide-react";
+import { Tender, TenderStatus, TenderResult } from "@/lib/tender-types";
+import { Sparkles, ListChecks, Award, BarChart3, ClipboardCheck, Users } from "lucide-react";
 import { toast } from "sonner";
 import TenderHeader from "@/components/tender-detail/TenderHeader";
 import ScoreCard from "@/components/tender-detail/ScoreCard";
 import AtestadosTab from "@/components/tender-detail/AtestadosTab";
 import InsightsTab from "@/components/tender-detail/InsightsTab";
+import StatusAdvanceButton from "@/components/tender-detail/StatusAdvanceButton";
+import ChecklistTab from "@/components/tender-detail/ChecklistTab";
+import TeamTab from "@/components/tender-detail/TeamTab";
 
 const TenderDetail = () => {
   const { id } = useParams();
@@ -39,9 +42,9 @@ const TenderDetail = () => {
 
   const toggleFavorite = async () => {
     if (!tender) return;
-    const newVal = !(tender as any).is_favorite;
+    const newVal = !tender.is_favorite;
     await supabase.from("tenders").update({ is_favorite: newVal } as any).eq("id", tender.id);
-    setTender({ ...tender, is_favorite: newVal } as any);
+    setTender({ ...tender, is_favorite: newVal });
     toast.success(newVal ? "Favoritado" : "Removido");
   };
 
@@ -49,8 +52,63 @@ const TenderDetail = () => {
     if (!tender) return;
     const newStatus = tender.status === "archived" ? "analyzed" : "archived";
     await supabase.from("tenders").update({ status: newStatus } as any).eq("id", tender.id);
-    setTender({ ...tender, status: newStatus as any });
+    setTender({ ...tender, status: newStatus as TenderStatus });
     toast.success(newStatus === "archived" ? "Arquivado" : "Desarquivado");
+  };
+
+  const handleStatusChange = (status: TenderStatus, result?: TenderResult) => {
+    if (!tender) return;
+    setTender({ ...tender, status, result: result ?? tender.result });
+  };
+
+  const generateChecklist = async () => {
+    if (!tender) return;
+    const insights = tender.ai_insights as Record<string, any> | null;
+    const items: any[] = [];
+    let order = 0;
+
+    // From requirements
+    tender.requirements?.forEach((req) => {
+      items.push({
+        tender_id: tender.id,
+        title: req,
+        description: null,
+        source: "requirement",
+        status: "pending",
+        sort_order: order++,
+      });
+    });
+
+    // From compliance_checklist
+    const checklist = insights?.compliance_checklist as string[] | undefined;
+    checklist?.forEach((item) => {
+      items.push({
+        tender_id: tender.id,
+        title: item,
+        description: null,
+        source: "compliance",
+        status: "pending",
+        sort_order: order++,
+      });
+    });
+
+    // From atestados_tecnicos
+    const atestados = insights?.atestados_tecnicos as any[] | undefined;
+    atestados?.forEach((at) => {
+      items.push({
+        tender_id: tender.id,
+        title: `${at.tipo === "profissional" ? "Atestado Profissional" : "Atestado Empresa"}: ${at.descricao}`,
+        description: `Especialidade: ${at.especialidade} | Quantidade: ${at.quantidade}`,
+        source: "atestado",
+        status: "pending",
+        sort_order: order++,
+      });
+    });
+
+    if (items.length > 0) {
+      await supabase.from("tender_checklist_items").insert(items as any);
+      toast.success(`${items.length} itens de checklist gerados`);
+    }
   };
 
   if (loading) {
@@ -75,13 +133,27 @@ const TenderDetail = () => {
   }
 
   const insights = tender.ai_insights as Record<string, any> | null;
-  const isFav = (tender as any).is_favorite;
   const requirements = tender.requirements || [];
+  const showTabs = ["analyzed", "em_montagem", "proposta_pronta", "enviado", "resultado"].includes(tender.status);
 
   return (
     <DashboardLayout>
       <div className="space-y-5 max-w-4xl">
-        <TenderHeader tender={tender} isFav={isFav} onToggleFavorite={toggleFavorite} onToggleArchive={toggleArchive} />
+        <TenderHeader tender={tender} isFav={tender.is_favorite} onToggleFavorite={toggleFavorite} onToggleArchive={toggleArchive} />
+
+        {/* Status advance button */}
+        <div className="flex items-center gap-3">
+          <StatusAdvanceButton
+            tender={tender}
+            onStatusChange={handleStatusChange}
+            onGenerateChecklist={generateChecklist}
+          />
+          {tender.status === "resultado" && tender.result && (
+            <span className={`text-sm font-semibold ${tender.result === "won" ? "text-success" : tender.result === "lost" ? "text-destructive" : "text-warning"}`}>
+              {tender.result === "won" ? "Ganhou" : tender.result === "lost" ? "Perdeu" : "Pendente"}
+            </span>
+          )}
+        </div>
 
         {/* Analyzing state */}
         {tender.status === "analyzing" && (
@@ -97,9 +169,9 @@ const TenderDetail = () => {
         )}
 
         {/* Score + Metrics */}
-        {tender.status === "analyzed" && <ScoreCard tender={tender} />}
+        {showTabs && <ScoreCard tender={tender} />}
 
-        {/* Summary - concise */}
+        {/* Summary */}
         {tender.ai_summary && (
           <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
             <CardContent className="p-4 flex items-start gap-3">
@@ -110,9 +182,9 @@ const TenderDetail = () => {
         )}
 
         {/* Tabs */}
-        {tender.status === "analyzed" && (
+        {showTabs && (
           <Tabs defaultValue="atestados" className="w-full">
-            <TabsList className="w-full grid grid-cols-3">
+            <TabsList className="w-full grid grid-cols-5">
               <TabsTrigger value="atestados" className="gap-1.5 text-xs">
                 <Award className="h-3.5 w-3.5" /> Atestados
               </TabsTrigger>
@@ -121,6 +193,12 @@ const TenderDetail = () => {
               </TabsTrigger>
               <TabsTrigger value="requisitos" className="gap-1.5 text-xs">
                 <ListChecks className="h-3.5 w-3.5" /> Requisitos
+              </TabsTrigger>
+              <TabsTrigger value="checklist" className="gap-1.5 text-xs">
+                <ClipboardCheck className="h-3.5 w-3.5" /> Checklist
+              </TabsTrigger>
+              <TabsTrigger value="equipe" className="gap-1.5 text-xs">
+                <Users className="h-3.5 w-3.5" /> Equipe
               </TabsTrigger>
             </TabsList>
 
@@ -151,6 +229,14 @@ const TenderDetail = () => {
                   </CardContent>
                 </Card>
               )}
+            </TabsContent>
+
+            <TabsContent value="checklist" className="mt-4">
+              <ChecklistTab tenderId={tender.id} />
+            </TabsContent>
+
+            <TabsContent value="equipe" className="mt-4">
+              <TeamTab tender={tender} />
             </TabsContent>
           </Tabs>
         )}
