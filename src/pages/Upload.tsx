@@ -12,7 +12,6 @@ import { Upload as UploadIcon, FileText, Sparkles, CheckCircle2 } from "lucide-r
 import { useNavigate } from "react-router-dom";
 
 const Upload = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
