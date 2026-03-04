@@ -10,7 +10,6 @@ import { Search, FileSearch, TrendingUp, Clock, CheckCircle2 } from "lucide-reac
 import { Card, CardContent } from "@/components/ui/card";
 
 const Index = () => {
-  const { user } = useAuth();
   const [tenders, setTenders] = useState<Tender[]>([]);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
