@@ -3,16 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { FileSearch } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 const PIN_CODE = "2026";
 
 const Login = () => {
   const [value, setValue] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleComplete = (pin: string) => {
     if (pin === PIN_CODE) {
-      sessionStorage.setItem("pin_authenticated", "true");
+      login();
       navigate("/");
     } else {
       toast.error("PIN incorreto");
