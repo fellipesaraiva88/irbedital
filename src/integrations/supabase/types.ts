@@ -92,6 +92,7 @@ export type Database = {
           file_name: string | null
           file_path: string | null
           id: string
+          is_favorite: boolean
           location: string | null
           organization: string | null
           raw_text: string | null
@@ -114,6 +115,7 @@ export type Database = {
           file_name?: string | null
           file_path?: string | null
           id?: string
+          is_favorite?: boolean
           location?: string | null
           organization?: string | null
           raw_text?: string | null
@@ -136,6 +138,7 @@ export type Database = {
           file_name?: string | null
           file_path?: string | null
           id?: string
+          is_favorite?: boolean
           location?: string | null
           organization?: string | null
           raw_text?: string | null
