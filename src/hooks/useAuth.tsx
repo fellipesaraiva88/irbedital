@@ -39,11 +39,9 @@ export const useAuth = () => useContext(AuthContext);
 
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { authenticated } = useAuth();
-  const navigate = useNavigate();
 
   if (!authenticated) {
-    navigate("/login");
-    return null;
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
