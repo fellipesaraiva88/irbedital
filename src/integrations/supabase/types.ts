@@ -100,7 +100,7 @@ export type Database = {
           status: Database["public"]["Enums"]["tender_status"]
           title: string
           updated_at: string
-          user_id: string
+          user_id: string | null
           value_estimate: number | null
         }
         Insert: {
@@ -122,7 +122,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["tender_status"]
           title: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           value_estimate?: number | null
         }
         Update: {
@@ -144,7 +144,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["tender_status"]
           title?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           value_estimate?: number | null
         }
         Relationships: []
