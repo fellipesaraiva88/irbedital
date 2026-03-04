@@ -171,12 +171,12 @@ const TenderDetail = () => {
         {/* Score + Metrics */}
         {showTabs && <ScoreCard tender={tender} />}
 
-        {/* Summary */}
+        {/* Summary - compact */}
         {tender.ai_summary && (
           <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-            <CardContent className="p-4 flex items-start gap-3">
-              <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-              <p className="text-sm leading-relaxed">{tender.ai_summary}</p>
+            <CardContent className="p-3 flex items-center gap-3">
+              <Sparkles className="h-4 w-4 text-primary shrink-0" />
+              <p className="text-xs leading-relaxed line-clamp-2">{tender.ai_summary}</p>
             </CardContent>
           </Card>
         )}
