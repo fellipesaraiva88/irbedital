@@ -40,7 +40,7 @@ const ChecklistTab = ({ tenderId }: { tenderId: string }) => {
   const [showAdd, setShowAdd] = useState(false);
 
   const fetchItems = async () => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("tender_checklist_items")
       .select("*")
       .eq("tender_id", tenderId)
