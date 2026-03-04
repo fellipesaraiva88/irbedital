@@ -32,7 +32,7 @@ const Upload = () => {
   };
 
   const handleUpload = async () => {
-    if (!file || !user || !title.trim()) return;
+    if (!file || !title.trim()) return;
 
     try {
       setStep("uploading");
