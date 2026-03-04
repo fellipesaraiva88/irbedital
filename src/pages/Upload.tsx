@@ -50,12 +50,11 @@ const Upload = () => {
       const { data: tender, error: insertError } = await supabase
         .from("tenders")
         .insert({
-          user_id: user.id,
           title: title.trim(),
           file_name: file.name,
           file_path: filePath,
           status: "analyzing" as const,
-        })
+        } as any)
         .select()
         .single();
 
