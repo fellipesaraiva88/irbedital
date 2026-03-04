@@ -1,10 +1,12 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tender, CATEGORY_LABELS, STATUS_LABELS } from "@/lib/tender-types";
-import { Calendar, MapPin, Building2, DollarSign } from "lucide-react";
+import { Calendar, MapPin, Building2, DollarSign, Star } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
   new: "bg-primary/10 text-primary border-primary/20",
@@ -13,8 +15,29 @@ const statusColors: Record<string, string> = {
   archived: "bg-muted text-muted-foreground border-border",
 };
 
-const TenderCard = ({ tender }: { tender: Tender }) => {
+const TenderCard = ({ tender, onUpdate }: { tender: Tender; onUpdate?: () => void }) => {
   const navigate = useNavigate();
+  const isFav = (tender as any).is_favorite;
+
+  const toggleFav = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await supabase.from("tenders").update({ is_favorite: !isFav } as any).eq("id", tender.id);
+    toast.success(isFav ? "Removido dos favoritos" : "Adicionado aos favoritos");
+    onUpdate?.();
+  };
+
+  // Deadline warning
+  let deadlineBadge = null;
+  if (tender.deadline && tender.status !== "archived") {
+    const days = Math.ceil((new Date(tender.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    if (days >= 0 && days <= 7) {
+      deadlineBadge = (
+        <Badge variant={days <= 1 ? "destructive" : "outline"} className="text-[10px]">
+          {days === 0 ? "Hoje!" : days === 1 ? "Amanhã" : `${days}d`}
+        </Badge>
+      );
+    }
+  }
 
   return (
     <Card
@@ -23,10 +46,16 @@ const TenderCard = ({ tender }: { tender: Tender }) => {
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-display text-base font-semibold leading-tight line-clamp-2">{tender.title}</h3>
-          <Badge variant="outline" className={statusColors[tender.status]}>
-            {STATUS_LABELS[tender.status]}
-          </Badge>
+          <h3 className="font-display text-base font-semibold leading-tight line-clamp-2 flex-1">{tender.title}</h3>
+          <div className="flex items-center gap-1 shrink-0">
+            {deadlineBadge}
+            <button onClick={toggleFav} className="p-1 rounded-md hover:bg-muted transition-colors">
+              <Star className={`h-4 w-4 ${isFav ? "fill-warning text-warning" : "text-muted-foreground/40"}`} />
+            </button>
+            <Badge variant="outline" className={statusColors[tender.status]}>
+              {STATUS_LABELS[tender.status]}
+            </Badge>
+          </div>
         </div>
         <Badge variant="secondary" className="w-fit text-xs">{CATEGORY_LABELS[tender.category]}</Badge>
       </CardHeader>
