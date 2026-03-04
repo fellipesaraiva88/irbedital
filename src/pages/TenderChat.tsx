@@ -215,32 +215,58 @@ const TenderChat = () => {
             {messages.map((msg, i) => (
               <div
                 key={i}
-                className={`flex gap-3 group animate-fade-in ${msg.role === "user" ? "justify-end" : ""}`}
+                className={`flex gap-3 group ${msg.role === "user" ? "justify-end" : ""}`}
+                style={{ animationDelay: `${i * 30}ms` }}
               >
                 {msg.role === "assistant" && (
-                  <div className="shrink-0 h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mt-1">
-                    <Bot className="h-4 w-4 text-primary" />
+                  <div className="shrink-0 h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mt-0.5 shadow-sm">
+                    <Bot className="h-4.5 w-4.5 text-primary" />
                   </div>
                 )}
-                <div className={`relative max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                <div className={`relative max-w-[88%] text-sm leading-relaxed ${
                   msg.role === "user"
-                    ? "bg-primary text-primary-foreground rounded-tr-sm"
-                    : "bg-muted rounded-tl-sm"
+                    ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-md px-4 py-3 shadow-sm"
+                    : ""
                 }`}>
                   {msg.role === "assistant" ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&>h1]:text-base [&>h2]:text-sm [&>h3]:text-sm [&>p:last-child]:mb-0">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    <div className="bg-card border border-border/60 rounded-2xl rounded-tl-md px-5 py-4 shadow-sm">
+                      <div className="
+                        prose prose-sm dark:prose-invert max-w-none
+                        [&>p]:mb-3 [&>p:last-child]:mb-0
+                        [&>ul]:mb-3 [&>ul]:space-y-1.5 [&>ul>li]:pl-1
+                        [&>ol]:mb-3 [&>ol]:space-y-1.5 [&>ol>li]:pl-1
+                        [&>h1]:text-base [&>h1]:font-bold [&>h1]:mb-3 [&>h1]:mt-4 [&>h1]:font-display
+                        [&>h2]:text-sm [&>h2]:font-bold [&>h2]:mb-2 [&>h2]:mt-3 [&>h2]:font-display [&>h2]:text-primary
+                        [&>h3]:text-sm [&>h3]:font-semibold [&>h3]:mb-2 [&>h3]:mt-3 [&>h3]:font-display
+                        [&>blockquote]:border-l-3 [&>blockquote]:border-primary/40 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-muted-foreground [&>blockquote]:my-3
+                        [&>pre]:bg-muted [&>pre]:rounded-lg [&>pre]:p-3 [&>pre]:text-xs [&>pre]:overflow-x-auto [&>pre]:my-3
+                        [&>code]:bg-muted [&>code]:px-1.5 [&>code]:py-0.5 [&>code]:rounded [&>code]:text-xs [&>code]:font-mono
+                        [&>table]:w-full [&>table]:text-xs [&>table]:my-3
+                        [&>table>thead>tr>th]:bg-muted [&>table>thead>tr>th]:px-3 [&>table>thead>tr>th]:py-2 [&>table>thead>tr>th]:text-left [&>table>thead>tr>th]:font-semibold
+                        [&>table>tbody>tr>td]:px-3 [&>table>tbody>tr>td]:py-2 [&>table>tbody>tr>td]:border-t [&>table>tbody>tr>td]:border-border/50
+                        [&>hr]:my-4 [&>hr]:border-border/50
+                        [&_strong]:text-foreground [&_strong]:font-semibold
+                        [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2
+                        text-foreground/90
+                      ">
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
+                      {/* Copy */}
+                      <div className="flex justify-end mt-2 pt-2 border-t border-border/30">
+                        <CopyButton text={msg.content} />
+                      </div>
                     </div>
                   ) : (
-                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                    <>
+                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                      <div className="absolute -bottom-5 right-1">
+                        <CopyButton text={msg.content} />
+                      </div>
+                    </>
                   )}
-                  {/* Copy button */}
-                  <div className="absolute -bottom-5 right-1">
-                    <CopyButton text={msg.content} />
-                  </div>
                 </div>
                 {msg.role === "user" && (
-                  <div className="shrink-0 h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                  <div className="shrink-0 h-9 w-9 rounded-xl bg-primary flex items-center justify-center mt-0.5 shadow-sm">
                     <User className="h-4 w-4 text-primary-foreground" />
                   </div>
                 )}
