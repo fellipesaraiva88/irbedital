@@ -106,7 +106,7 @@ const TenderDetail = () => {
     });
 
     if (items.length > 0) {
-      await supabase.from("tender_checklist_items").insert(items as any);
+      await (supabase as any).from("tender_checklist_items").insert(items);
       toast.success(`${items.length} itens de checklist gerados`);
     }
   };

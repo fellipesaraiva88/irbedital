@@ -7,6 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
@@ -78,108 +80,6 @@ export type Database = {
         }
         Relationships: []
       }
-      tender_checklist_items: {
-        Row: {
-          id: string
-          tender_id: string
-          title: string
-          description: string | null
-          source: string
-          status: string
-          sort_order: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          tender_id: string
-          title: string
-          description?: string | null
-          source?: string
-          status?: string
-          sort_order?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          tender_id?: string
-          title?: string
-          description?: string | null
-          source?: string
-          status?: string
-          sort_order?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      professionals: {
-        Row: {
-          id: string
-          name: string
-          crm: string | null
-          specialty: string | null
-          availability: string | null
-          source_file: string | null
-          raw_data: Json | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          crm?: string | null
-          specialty?: string | null
-          availability?: string | null
-          source_file?: string | null
-          raw_data?: Json | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          crm?: string | null
-          specialty?: string | null
-          availability?: string | null
-          source_file?: string | null
-          raw_data?: Json | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-      tender_team_assignments: {
-        Row: {
-          id: string
-          tender_id: string
-          professional_id: string | null
-          position_title: string
-          specialty_required: string | null
-          is_filled: boolean
-          notes: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          tender_id: string
-          professional_id?: string | null
-          position_title: string
-          specialty_required?: string | null
-          is_filled?: boolean
-          notes?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          tender_id?: string
-          professional_id?: string | null
-          position_title?: string
-          specialty_required?: string | null
-          is_filled?: boolean
-          notes?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
       tenders: {
         Row: {
           ai_insights: Json | null
@@ -197,7 +97,6 @@ export type Database = {
           organization: string | null
           raw_text: string | null
           requirements: string[] | null
-          result: string | null
           source_url: string | null
           status: Database["public"]["Enums"]["tender_status"]
           title: string
@@ -221,7 +120,6 @@ export type Database = {
           organization?: string | null
           raw_text?: string | null
           requirements?: string[] | null
-          result?: string | null
           source_url?: string | null
           status?: Database["public"]["Enums"]["tender_status"]
           title: string
@@ -245,7 +143,6 @@ export type Database = {
           organization?: string | null
           raw_text?: string | null
           requirements?: string[] | null
-          result?: string | null
           source_url?: string | null
           status?: Database["public"]["Enums"]["tender_status"]
           title?: string
@@ -271,7 +168,7 @@ export type Database = {
         | "saude"
         | "educacao"
         | "outros"
-      tender_status: "new" | "analyzing" | "analyzed" | "em_montagem" | "proposta_pronta" | "enviado" | "resultado" | "archived"
+      tender_status: "new" | "analyzing" | "analyzed" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -408,7 +305,7 @@ export const Constants = {
         "educacao",
         "outros",
       ],
-      tender_status: ["new", "analyzing", "analyzed", "em_montagem", "proposta_pronta", "enviado", "resultado", "archived"],
+      tender_status: ["new", "analyzing", "analyzed", "archived"],
     },
   },
 } as const

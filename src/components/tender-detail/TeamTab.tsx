@@ -33,8 +33,8 @@ const TeamTab = ({ tender }: { tender: Tender }) => {
 
   const fetchData = async () => {
     const [assignRes, profRes] = await Promise.all([
-      supabase.from("tender_team_assignments").select("*").eq("tender_id", tender.id).order("created_at"),
-      supabase.from("professionals").select("id, name, crm, specialty").order("name"),
+      (supabase as any).from("tender_team_assignments").select("*").eq("tender_id", tender.id).order("created_at"),
+      (supabase as any).from("professionals").select("id, name, crm, specialty").order("name"),
     ]);
     setAssignments((assignRes.data as unknown as TeamAssignment[]) || []);
     setProfessionals((profRes.data as unknown as Professional[]) || []);
@@ -66,7 +66,7 @@ const TeamTab = ({ tender }: { tender: Tender }) => {
       return;
     }
 
-    const { error } = await supabase.from("tender_team_assignments").insert(positions as any);
+    const { error } = await (supabase as any).from("tender_team_assignments").insert(positions);
     if (error) {
       toast.error("Erro ao gerar posições");
       return;
@@ -81,7 +81,7 @@ const TeamTab = ({ tender }: { tender: Tender }) => {
       professional_id: professionalId,
       is_filled: !!professionalId,
     };
-    await supabase.from("tender_team_assignments").update(updateData).eq("id", assignmentId);
+    await (supabase as any).from("tender_team_assignments").update(updateData).eq("id", assignmentId);
     setAssignments(assignments.map((a) =>
       a.id === assignmentId ? { ...a, professional_id: professionalId, is_filled: !!professionalId } : a
     ));

@@ -40,7 +40,7 @@ const ChecklistTab = ({ tenderId }: { tenderId: string }) => {
   const [showAdd, setShowAdd] = useState(false);
 
   const fetchItems = async () => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("tender_checklist_items")
       .select("*")
       .eq("tender_id", tenderId)
@@ -53,13 +53,13 @@ const ChecklistTab = ({ tenderId }: { tenderId: string }) => {
 
   const toggleItem = async (item: ChecklistItem) => {
     const newStatus = item.status === "completed" ? "pending" : "completed";
-    await supabase.from("tender_checklist_items").update({ status: newStatus } as any).eq("id", item.id);
+    await (supabase as any).from("tender_checklist_items").update({ status: newStatus }).eq("id", item.id);
     setItems(items.map((i) => i.id === item.id ? { ...i, status: newStatus } : i));
   };
 
   const addItem = async () => {
     if (!newItemTitle.trim()) return;
-    const { data } = await supabase.from("tender_checklist_items").insert({
+    const { data } = await (supabase as any).from("tender_checklist_items").insert({
       tender_id: tenderId,
       title: newItemTitle.trim(),
       source: "manual",
