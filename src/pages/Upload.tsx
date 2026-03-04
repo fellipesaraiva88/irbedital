@@ -12,7 +12,6 @@ import { Upload as UploadIcon, FileText, Sparkles, CheckCircle2 } from "lucide-r
 import { useNavigate } from "react-router-dom";
 
 const Upload = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -33,14 +32,13 @@ const Upload = () => {
   };
 
   const handleUpload = async () => {
-    if (!file || !user || !title.trim()) return;
+    if (!file || !title.trim()) return;
 
     try {
       setStep("uploading");
       setProgress(20);
 
-      // Upload file to storage
-      const filePath = `${user.id}/${Date.now()}_${file.name}`;
+      const filePath = `shared/${Date.now()}_${file.name}`;
       const { error: uploadError } = await supabase.storage
         .from("tender-files")
         .upload(filePath, file);
@@ -52,12 +50,11 @@ const Upload = () => {
       const { data: tender, error: insertError } = await supabase
         .from("tenders")
         .insert({
-          user_id: user.id,
           title: title.trim(),
           file_name: file.name,
           file_path: filePath,
           status: "analyzing" as const,
-        })
+        } as any)
         .select()
         .single();
 
