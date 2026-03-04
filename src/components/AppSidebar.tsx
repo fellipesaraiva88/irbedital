@@ -68,7 +68,12 @@ const AppSidebar = () => {
         ))}
       </nav>
 
-      <div className="border-t border-sidebar-border p-4">
+      <div className="border-t border-sidebar-border p-4 space-y-2">
+        {/* Keyboard shortcuts hint */}
+        <div className="px-3 py-1.5 text-[10px] text-sidebar-foreground/40 space-y-0.5">
+          <div className="flex justify-between"><span>Buscar</span><kbd className="font-mono">Ctrl+K</kbd></div>
+          <div className="flex justify-between"><span>Upload</span><kbd className="font-mono">Ctrl+U</kbd></div>
+        </div>
         <button
           onClick={handleSignOut}
           className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
