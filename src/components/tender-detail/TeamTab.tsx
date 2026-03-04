@@ -66,7 +66,7 @@ const TeamTab = ({ tender }: { tender: Tender }) => {
       return;
     }
 
-    const { error } = await supabase.from("tender_team_assignments").insert(positions as any);
+    const { error } = await (supabase as any).from("tender_team_assignments").insert(positions);
     if (error) {
       toast.error("Erro ao gerar posições");
       return;
