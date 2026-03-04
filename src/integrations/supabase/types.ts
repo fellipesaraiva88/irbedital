@@ -14,7 +14,141 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tender_alerts: {
+        Row: {
+          categories: Database["public"]["Enums"]["tender_category"][] | null
+          created_at: string
+          id: string
+          is_active: boolean
+          keywords: string[] | null
+          locations: string[] | null
+          max_value: number | null
+          min_value: number | null
+          name: string
+          user_id: string
+        }
+        Insert: {
+          categories?: Database["public"]["Enums"]["tender_category"][] | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          keywords?: string[] | null
+          locations?: string[] | null
+          max_value?: number | null
+          min_value?: number | null
+          name: string
+          user_id: string
+        }
+        Update: {
+          categories?: Database["public"]["Enums"]["tender_category"][] | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          keywords?: string[] | null
+          locations?: string[] | null
+          max_value?: number | null
+          min_value?: number | null
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tenders: {
+        Row: {
+          ai_insights: Json | null
+          ai_summary: string | null
+          category: Database["public"]["Enums"]["tender_category"]
+          contact_info: Json | null
+          created_at: string
+          deadline: string | null
+          description: string | null
+          file_name: string | null
+          file_path: string | null
+          id: string
+          location: string | null
+          organization: string | null
+          raw_text: string | null
+          requirements: string[] | null
+          source_url: string | null
+          status: Database["public"]["Enums"]["tender_status"]
+          title: string
+          updated_at: string
+          user_id: string
+          value_estimate: number | null
+        }
+        Insert: {
+          ai_insights?: Json | null
+          ai_summary?: string | null
+          category?: Database["public"]["Enums"]["tender_category"]
+          contact_info?: Json | null
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          location?: string | null
+          organization?: string | null
+          raw_text?: string | null
+          requirements?: string[] | null
+          source_url?: string | null
+          status?: Database["public"]["Enums"]["tender_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+          value_estimate?: number | null
+        }
+        Update: {
+          ai_insights?: Json | null
+          ai_summary?: string | null
+          category?: Database["public"]["Enums"]["tender_category"]
+          contact_info?: Json | null
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          location?: string | null
+          organization?: string | null
+          raw_text?: string | null
+          requirements?: string[] | null
+          source_url?: string | null
+          status?: Database["public"]["Enums"]["tender_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+          value_estimate?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +157,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      tender_category:
+        | "obras"
+        | "servicos"
+        | "compras"
+        | "tecnologia"
+        | "saude"
+        | "educacao"
+        | "outros"
+      tender_status: "new" | "analyzing" | "analyzed" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +292,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      tender_category: [
+        "obras",
+        "servicos",
+        "compras",
+        "tecnologia",
+        "saude",
+        "educacao",
+        "outros",
+      ],
+      tender_status: ["new", "analyzing", "analyzed", "archived"],
+    },
   },
 } as const
