@@ -70,6 +70,24 @@ const Index = () => {
 
   const countByStatus = (status: TenderStatus) => tenders.filter((t) => t.status === status).length;
 
+  const totalPipelineValue = tenders
+    .filter(t => !["archived", "resultado"].includes(t.status) && t.value_estimate)
+    .reduce((sum, t) => sum + Number(t.value_estimate || 0), 0);
+
+  const avgScore = (() => {
+    const scored = tenders.filter(t => (t.ai_insights as any)?.score != null);
+    if (scored.length === 0) return null;
+    return Math.round(scored.reduce((s, t) => s + ((t.ai_insights as any)?.score || 0), 0) / scored.length);
+  })();
+
+  const topOpportunities = tenders
+    .filter(t => {
+      const s = (t.ai_insights as any)?.score;
+      return s != null && s >= 60 && !["archived", "resultado"].includes(t.status);
+    })
+    .sort((a, b) => ((b.ai_insights as any)?.score || 0) - ((a.ai_insights as any)?.score || 0))
+    .slice(0, 3);
+
   const stats = {
     total: tenders.length,
     analyzed: countByStatus("analyzed"),
