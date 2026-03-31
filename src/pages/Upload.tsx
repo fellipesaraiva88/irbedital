@@ -51,6 +51,13 @@ const Upload = () => {
 
   const handleDragLeave = useCallback(() => setDragOver(false), []);
 
+  const sanitizeFileName = (name: string) => {
+    return name
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9._-]/g, "_")
+      .replace(/_+/g, "_");
+  };
+
   const handleUpload = async () => {
     if (!file || !title.trim()) return;
 
@@ -58,7 +65,8 @@ const Upload = () => {
       setStep("uploading");
       setProgress(20);
 
-      const filePath = `shared/${Date.now()}_${file.name}`;
+      const safeName = sanitizeFileName(file.name);
+      const filePath = `shared/${Date.now()}_${safeName}`;
       const { error: uploadError } = await supabase.storage
         .from("tender-files")
         .upload(filePath, file);
