@@ -242,22 +242,74 @@ const Index = () => {
           </Card>
         )}
 
-        {/* Deadline Alerts - clickable */}
-        {deadlineAlerts.length > 0 && (
-          <Card className="border-warning/30 bg-warning/5 animate-fade-in">
+        {/* Prazos Timeline - Comprehensive */}
+        {allUpcomingDeadlines.length > 0 && (
+          <Card className="border-border/50 animate-fade-in overflow-hidden">
             <CardHeader className="pb-2">
-              <CardTitle className="font-display text-sm flex items-center gap-2 text-warning">
-                <AlertTriangle className="h-4 w-4" /> Prazos Próximos (7 dias)
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="font-display text-sm flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-primary" /> Calendário de Prazos
+                  <Badge variant="secondary" className="text-[10px] ml-1">{allUpcomingDeadlines.length}</Badge>
+                </CardTitle>
+                <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                  <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-destructive inline-block" /> Urgente</span>
+                  <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-warning inline-block" /> 3-7 dias</span>
+                  <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-primary inline-block" /> 8-30 dias</span>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-2">
-              {deadlineAlerts.map((t) => {
+            <CardContent className="space-y-1 pb-4">
+              {allUpcomingDeadlines.map((t) => {
                 const days = Math.ceil((new Date(t.deadline!).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                const isUrgent = days <= 2;
+                const isWarning = days > 2 && days <= 7;
+                const barColor = isUrgent ? "bg-destructive" : isWarning ? "bg-warning" : "bg-primary";
+                const textColor = isUrgent ? "text-destructive" : isWarning ? "text-warning" : "text-primary";
+                const bgColor = isUrgent ? "bg-destructive/5 border-destructive/20" : isWarning ? "bg-warning/5 border-warning/20" : "bg-background border-border/50";
+                const barWidth = Math.max(5, 100 - (days / 30) * 100);
+
                 return (
-                  <a key={t.id} href={`/tender/${t.id}`} className="flex items-center justify-between text-sm hover:bg-warning/5 rounded-lg px-2 py-1.5 -mx-2 transition-colors">
-                    <span className="truncate flex-1 font-medium">{t.title}</span>
-                    <Badge variant={days <= 1 ? "destructive" : days <= 3 ? "outline" : "secondary"} className="ml-2 shrink-0">
-                      {days === 0 ? "Hoje!" : days === 1 ? "Amanhã" : `${days} dias`}
+                  <a
+                    key={t.id}
+                    href={`/tender/${t.id}`}
+                    className={`flex items-center gap-3 rounded-lg border px-3 py-2 transition-all hover:shadow-sm hover:-translate-x-0.5 ${bgColor} ${isUrgent ? "animate-pulse" : ""}`}
+                  >
+                    {/* Indicator bar */}
+                    <div className={`w-1 self-stretch rounded-full shrink-0 ${barColor}`} />
+
+                    {/* Date column */}
+                    <div className={`text-center shrink-0 w-12 ${textColor}`}>
+                      <div className="text-lg font-bold font-display leading-none">
+                        {format(new Date(t.deadline!), "dd", { locale: ptBR })}
+                      </div>
+                      <div className="text-[10px] uppercase font-medium">
+                        {format(new Date(t.deadline!), "MMM", { locale: ptBR })}
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{t.title}</p>
+                      <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
+                        {t.organization && <span className="truncate">{t.organization}</span>}
+                        {t.value_estimate && (
+                          <span className="font-semibold text-foreground/70">
+                            R$ {Number(t.value_estimate).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                          </span>
+                        )}
+                      </div>
+                      {/* Urgency bar */}
+                      <div className="h-0.5 rounded-full bg-muted mt-1.5 w-full">
+                        <div className={`h-full rounded-full ${barColor} transition-all`} style={{ width: `${barWidth}%` }} />
+                      </div>
+                    </div>
+
+                    {/* Days badge */}
+                    <Badge
+                      variant={isUrgent ? "destructive" : isWarning ? "outline" : "secondary"}
+                      className={`shrink-0 font-bold text-xs ${isWarning ? "border-warning/40 text-warning" : ""}`}
+                    >
+                      {days === 0 ? "HOJE!" : days === 1 ? "AMANHÃ" : `${days}d`}
                     </Badge>
                   </a>
                 );
