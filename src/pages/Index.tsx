@@ -7,7 +7,7 @@ import WelcomeBanner from "@/components/WelcomeBanner";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tender, TenderCategory, CATEGORY_LABELS, STATUS_LABELS, TenderStatus } from "@/lib/tender-types";
-import { Search, FileSearch, TrendingUp, Clock, CheckCircle2, AlertTriangle, Star, Hammer, Send, Trophy } from "lucide-react";
+import { Search, FileSearch, TrendingUp, Clock, CheckCircle2, AlertTriangle, Star, Hammer, Send, Trophy, Gauge, DollarSign } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -69,6 +69,24 @@ const Index = () => {
     });
 
   const countByStatus = (status: TenderStatus) => tenders.filter((t) => t.status === status).length;
+
+  const totalPipelineValue = tenders
+    .filter(t => !["archived", "resultado"].includes(t.status) && t.value_estimate)
+    .reduce((sum, t) => sum + Number(t.value_estimate || 0), 0);
+
+  const avgScore = (() => {
+    const scored = tenders.filter(t => (t.ai_insights as any)?.score != null);
+    if (scored.length === 0) return null;
+    return Math.round(scored.reduce((s, t) => s + ((t.ai_insights as any)?.score || 0), 0) / scored.length);
+  })();
+
+  const topOpportunities = tenders
+    .filter(t => {
+      const s = (t.ai_insights as any)?.score;
+      return s != null && s >= 60 && !["archived", "resultado"].includes(t.status);
+    })
+    .sort((a, b) => ((b.ai_insights as any)?.score || 0) - ((a.ai_insights as any)?.score || 0))
+    .slice(0, 3);
 
   const stats = {
     total: tenders.length,
@@ -163,27 +181,58 @@ const Index = () => {
 
         {/* Stats - with animated counters */}
         {tenders.length > 0 && (
-          <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-3 grid-cols-2 lg:grid-cols-6">
             {[
               { label: "Total", value: stats.total, icon: FileSearch, color: "text-primary" },
               { label: "Analisados", value: stats.analyzed, icon: CheckCircle2, color: "text-success" },
               { label: "Em Montagem", value: stats.em_montagem, icon: Hammer, color: "text-orange-500" },
               { label: "Enviados", value: stats.enviado, icon: Send, color: "text-purple-500" },
-              { label: "Taxa de Sucesso", value: successRate !== null ? `${successRate}%` : "—", icon: Trophy, color: "text-emerald-500" },
+              { label: "Score Médio", value: avgScore !== null ? `${avgScore}` : "—", icon: Gauge, color: avgScore && avgScore >= 60 ? "text-success" : "text-warning" },
+              { label: "Valor Pipeline", value: totalPipelineValue > 0 ? `R$${(totalPipelineValue / 1000).toFixed(0)}k` : "—", icon: DollarSign, color: "text-success" },
             ].map((stat, i) => (
               <Card key={stat.label} className="border-border/50 hover:shadow-md transition-shadow duration-200 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-                <CardContent className="flex items-center gap-3 p-4">
+                <CardContent className="flex items-center gap-3 p-3">
                   <div className={`rounded-xl bg-muted p-2 ${stat.color}`}>
                     <stat.icon className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-xl font-bold font-display">{stat.value}</p>
-                    <p className="text-[11px] text-muted-foreground">{stat.label}</p>
+                    <p className="text-lg font-bold font-display">{stat.value}</p>
+                    <p className="text-[10px] text-muted-foreground">{stat.label}</p>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
+        )}
+
+        {/* Top Opportunities */}
+        {topOpportunities.length > 0 && (
+          <Card className="border-success/30 bg-success/5 animate-fade-in">
+            <CardHeader className="pb-2">
+              <CardTitle className="font-display text-sm flex items-center gap-2 text-success">
+                <TrendingUp className="h-4 w-4" /> Melhores Oportunidades
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {topOpportunities.map((t) => {
+                const s = (t.ai_insights as any)?.score;
+                return (
+                  <a key={t.id} href={`/tender/${t.id}`} className="flex items-center justify-between text-sm hover:bg-success/5 rounded-lg px-2 py-1.5 -mx-2 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <span className="truncate font-medium block">{t.title}</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {t.organization && `${t.organization} • `}
+                        {t.value_estimate ? `R$ ${Number(t.value_estimate).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}` : ""}
+                      </span>
+                    </div>
+                    <Badge variant="outline" className="ml-2 shrink-0 border-success/30 text-success font-bold">
+                      {s}pts
+                    </Badge>
+                  </a>
+                );
+              })}
+            </CardContent>
+          </Card>
         )}
 
         {/* Deadline Alerts - clickable */}
