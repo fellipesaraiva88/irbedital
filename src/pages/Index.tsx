@@ -101,11 +101,18 @@ const Index = () => {
     ? Math.round((stats.won / (stats.won + stats.lost)) * 100)
     : null;
 
-  const deadlineAlerts = tenders.filter((t) => {
-    if (!t.deadline || t.status === "archived") return false;
-    const diff = (new Date(t.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
-    return diff >= 0 && diff <= 7;
-  }).sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime());
+  const allUpcomingDeadlines = tenders
+    .filter((t) => {
+      if (!t.deadline || t.status === "archived") return false;
+      const diff = (new Date(t.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+      return diff >= 0 && diff <= 30;
+    })
+    .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime());
+
+  const deadlineAlerts = allUpcomingDeadlines.filter((t) => {
+    const diff = (new Date(t.deadline!).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+    return diff <= 7;
+  });
 
   const categoryData = Object.entries(
     tenders.reduce<Record<string, number>>((acc, t) => {
